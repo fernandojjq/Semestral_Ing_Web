@@ -1,0 +1,197 @@
+/* Fintech Design System - 2025 (Fixed) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Palette */
+    --primary-dark: #0f172a;
+    /* Slate 900 */
+    --primary-light: #334155;
+    /* Slate 700 */
+    --accent-color: #10b981;
+    /* Emerald 500 */
+    --accent-hover: #059669;
+    /* Emerald 600 */
+    --bg-body: #f8fafc;
+    /* Slate 50 */
+    --bg-card: #ffffff;
+    --border-color: #e2e8f0;
+
+    /* Functional Colors */
+    --success-bg: #d1fae5;
+    --success-text: #065f46;
+    --danger-bg: #fee2e2;
+    --danger-text: #991b1b;
+    --warning-bg: #fffbeb;
+    --warning-text: #92400e;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-body);
+    color: var(--primary-light);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--primary-dark);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+
+/* Navbar */
+.navbar {
+    background-color: var(--primary-dark) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    color: white !important;
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: -0.025em;
+}
+
+.nav-link {
+    color: #94a3b8 !important;
+    /* Slate 400 */
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: white !important;
+}
+
+/* Cards */
+.card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    /* More rounded */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.shadow-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+.card-header {
+    background-color: white;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem 1.5rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 0.625rem 1.25rem;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-primary:hover {
+    background-color: #1e293b;
+    border-color: #1e293b;
+}
+
+.btn-success {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Landing Page Specifics */
+.hero {
+    background-color: var(--primary-dark);
+    /* Fallback */
+    background: linear-gradient(135deg, #0f172a 0%, #334155 100%) !important;
+    color: white !important;
+    padding: 8rem 0 6rem;
+    /* More padding top for fixed navbar */
+    margin-bottom: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero h1 {
+    color: white !important;
+}
+
+.btn-landing {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 1rem 3rem;
+    font-size: 1.1rem;
+    border-radius: 50rem;
+    text-decoration: none;
+    font-weight: 700;
+    transition: all 0.3s;
+    border: 2px solid var(--accent-color);
+}
+
+.btn-landing:hover {
+    background-color: transparent;
+    color: var(--accent-color);
+    background-color: white;
+    border-color: white;
+    color: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    transition: transform 0.3s;
+}
+
+.card:hover .feature-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* Utilities */
+.text-indigo {
+    color: #4f46e5 !important;
+}
+
+.bg-indigo {
+    background-color: #e0e7ff !important;
+}
+
+.text-slate-900 {
+    color: #0f172a !important;
+}
