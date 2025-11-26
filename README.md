@@ -62,7 +62,7 @@ Este sistema permite la gestión de asientos contables, control de usuarios, rep
 
 **Perfil Gerente (Cierre de Mes):**
 *   **Usuario:** gerente@sistema.com
-*   **Contraseña:** root2514
+*   **Contraseña:** Grupo7ingweb
 
 ---
 
