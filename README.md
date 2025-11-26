@@ -64,7 +64,3 @@ Este sistema permite la gestión de asientos contables, control de usuarios, rep
 *   **Usuario:** gerente@sistema.com
 *   **Contraseña:** Grupo7ingweb
 
----
-
-## 📸 Estado del Proyecto
-El sistema cumple con el 100% de la rúbrica de evaluación, incluyendo la implementación de Interfaces PHP y validaciones de seguridad contra inyección SQL (Clase Sanitizar).
