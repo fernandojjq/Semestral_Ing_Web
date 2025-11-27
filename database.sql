@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS transacciones_pasarela (
 INSERT INTO usuarios (nombre, email, password, rol, activo) VALUES 
 ('Administrador', 'admin@sistema.com', '$2y$12$uC412faEnjebqd/zQ6Q2WO12vlm4f9UQ/D9ce4A.O3T37CD49d5r2', 'admin', 1);
 
--- Gerente: gerente / root2514
+-- Gerente: gerente / Grupo7ingweb
 INSERT INTO usuarios (nombre, email, password, rol, activo) VALUES 
 ('Gerente General', 'gerente@sistema.com', '$2y$12$uC412faEnjebqd/zQ6Q2WO12vlm4f9UQ/D9ce4A.O3T37CD49d5r2', 'gerente', 1);
 

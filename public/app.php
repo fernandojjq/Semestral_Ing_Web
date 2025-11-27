@@ -127,25 +127,61 @@ switch ($view) {
             try {
                 $monto = (float) $_POST['monto'];
                 $concepto = Sanitizar::limpiar($_POST['concepto']);
-                $referencia = isset($_POST['referencia_pago']) ? Sanitizar::limpiar($_POST['referencia_pago']) : '';
+                $metodo = $_POST['metodo'] ?? 'tarjeta';
                 $descripcion_asiento = "Pago Pasarela: $concepto";
-                if (!empty($referencia)) {
-                    $descripcion_asiento .= " (Ref: $referencia)";
+
+                // Validaciones Estrictas
+                if ($monto <= 0) {
+                    throw new Exception("El monto debe ser mayor a cero.");
+                }
+
+                if ($metodo == 'tarjeta') {
+                    $cardNumber = str_replace(' ', '', $_POST['card_number'] ?? '');
+                    $cardExpiry = $_POST['card_expiry'] ?? '';
+                    $cardCvv = $_POST['card_cvv'] ?? '';
+
+                    // 1. Validar 16 dígitos
+                    if (!preg_match('/^\d{16}$/', $cardNumber)) {
+                        throw new Exception("El número de tarjeta debe tener 16 dígitos exactos.");
+                    }
+                    // 2. Validar CVV (3 dígitos)
+                    if (!preg_match('/^\d{3}$/', $cardCvv)) {
+                        throw new Exception("El CVV debe tener 3 dígitos.");
+                    }
+                    // 3. Validar Expiración (MM/YY)
+                    if (!preg_match('/^(0[1-9]|1[0-2])\/([0-9]{2})$/', $cardExpiry)) {
+                        throw new Exception("Fecha de vencimiento inválida. Formato MM/YY.");
+                    }
+
+                    // Validar que no esté vencida
+                    $parts = explode('/', $cardExpiry);
+                    $expMonth = (int) $parts[0];
+                    $expYear = (int) $parts[1] + 2000;
+                    $currentYear = (int) date('Y');
+                    $currentMonth = (int) date('m');
+
+                    if ($expYear < $currentYear || ($expYear == $currentYear && $expMonth < $currentMonth)) {
+                        throw new Exception("La tarjeta está vencida.");
+                    }
+
+                    // Enmascarar para descripción
+                    $maskedCard = substr($cardNumber, 0, 4) . ' **** **** ' . substr($cardNumber, -4);
+                    $descripcion_asiento .= " (Tarjeta: $maskedCard)";
+
+                } elseif ($metodo == 'transferencia') {
+                    $referencia = Sanitizar::limpiar($_POST['referencia_pago'] ?? '');
+
+                    // Validar Referencia (6-20 caracteres)
+                    if (strlen($referencia) < 6 || strlen($referencia) > 20) {
+                        throw new Exception("El número de referencia debe tener entre 6 y 20 caracteres.");
+                    }
+
+                    $descripcion_asiento .= " (Ref ACH: $referencia)";
                 }
 
                 // Simular Pago Exitoso
                 // Crear Asiento Automático
-                // Debita Banco (102), Acredita Ingresos (401) - Ejemplo simplificado
-                // Necesitamos IDs reales. Asumiremos 102 (Banco) y 401 (Ventas) por el seeding.
-                // Pero mejor buscamos por código si es posible, o hardcodeamos IDs si sabemos el orden.
-                // En seeding: 102 es ID 3 (aprox), 401 es ID 9. 
-                // Mejor hacemos una búsqueda rápida o usamos los IDs del seeding.
-                // IDs: 
-                // 100-Activos(1), 101-Caja(2), 102-Banco(3), 103-CxC(4)
-                // 200-Pasivos(5), 201-CxP(6)
-                // 300-Capital(7)
-                // 400-Ingresos(8), 401-Ventas(9)
-
+                // Debita Banco (102), Acredita Ingresos (401)
                 $detalles = [
                     ['cuenta_id' => 3, 'debe' => $monto, 'haber' => 0], // Banco
                     ['cuenta_id' => 9, 'debe' => 0, 'haber' => $monto]  // Ventas
@@ -159,7 +195,7 @@ switch ($view) {
                 $stmt = $conn->prepare("INSERT INTO transacciones_pasarela (monto, concepto, asiento_id) VALUES (?, ?, ?)");
                 $stmt->execute([$monto, $concepto, $asientoId]);
 
-                $success = "Pago realizado con éxito. Asiento #$asientoId generado automáticamente.";
+                $success = "Pago procesado con éxito. Asiento #$asientoId generado automáticamente.";
             } catch (Exception $e) {
                 $error = "Error en el pago: " . $e->getMessage();
             }
