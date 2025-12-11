@@ -12,12 +12,12 @@ Este sistema permite la gestión de asientos contables, control de usuarios, rep
 **Grupo:** 7
 
 ### 👥 Integrantes del Equipo
-| Nombre | Cédula | Rol Principal |
-|--------|--------|---------------|
-| **Fernando Jiménez** | 20-24-7669 | Desarrollador Full Stack / DevOps |
-| **Bryan Law** | 8-1011-2459 | Backend / Seguridad |
-| **Evaristo Álvarez** | 8-1005-1928 | Base de Datos / Lógica Contable |
-| **Diego Gordón** | 8-1017-349 | QA Testing / Documentación |
+| Nombre | Cédula |
+|--------|--------|
+| **Fernando Jiménez** | 20-24-7669 |
+| **Bryan Law** | 8-1011-2459 |
+| **Evaristo Álvarez** | 8-1005-1928 |
+| **Diego Gordón** | 8-1017-349 |
 
 ---
 
@@ -28,8 +28,9 @@ Este sistema permite la gestión de asientos contables, control de usuarios, rep
     *   Libro Diario con validación estricta de Partida Doble (Debe = Haber).
     *   Catálogo de Cuentas estandarizado.
 3.  **Pasarela de Pagos:** Simulación de cobros con tarjeta/transferencia que genera asientos contables automáticos.
-4.  **Auditoría y Cierre:** Funcionalidad de "Cierre de Mes" exclusiva para Gerencia con generación de Firma Digital (Hash SHA256).
-5.  **Reportes en Tiempo Real:** Dashboard con Balance General y Estado de Resultados.
+4.  **Auditoría de Fechas:** Separación de Fecha Contable (Manual/Histórica) vs Fecha Real de Registro (Timestamp inmutable de auditoría).
+5.  **Auditoría y Cierre:** Funcionalidad de "Cierre de Mes" exclusiva para Gerencia con generación de Firma Digital (Hash SHA256).
+6.  **Reportes en Tiempo Real:** Dashboard con Balance General y Estado de Resultados.
 
 ## 🛠️ Tecnologías
 
@@ -58,9 +59,8 @@ Este sistema permite la gestión de asientos contables, control de usuarios, rep
 
 **Perfil Administrador (Gestión de Usuarios):**
 *   **Usuario:** admin@sistema.com
-*   **Contraseña:** Grupo7ingweb
+*   **Contraseña:** Grupo7admin
 
 **Perfil Gerente (Cierre de Mes):**
 *   **Usuario:** gerente@sistema.com
-*   **Contraseña:** Grupo7ingweb
-
+*   **Contraseña:** Grupo7admin

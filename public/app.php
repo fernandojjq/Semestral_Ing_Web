@@ -82,6 +82,16 @@ switch ($view) {
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 try {
                     $descripcion = Sanitizar::limpiar($_POST['descripcion']);
+                    $fechaOperacion = $_POST['fecha'] ?? date('Y-m-d');
+
+                    // Validación Estricta de Fecha
+                    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaOperacion)) {
+                        throw new Exception("Formato de fecha inválido.");
+                    }
+                    if ($fechaOperacion > date('Y-m-d')) {
+                        throw new Exception("Error: No se permiten fechas futuras.");
+                    }
+
                     $detalles = [];
                     // Procesar detalles del formulario (asumiendo arrays en POST)
                     // Ejemplo: cuentas[], debes[], haberes[]
@@ -97,8 +107,8 @@ switch ($view) {
                         }
                     }
 
-                    $model->crearAsiento($_SESSION['user_id'], $descripcion, $detalles);
-                    $success = "Asiento creado correctamente.";
+                    $model->crearAsiento($_SESSION['user_id'], $descripcion, $detalles, $fechaOperacion);
+                    $success = "Asiento creado correctamente con fecha operativa: $fechaOperacion";
                 } catch (Exception $e) {
                     $error = $e->getMessage();
                 }
@@ -128,11 +138,20 @@ switch ($view) {
                 $monto = (float) $_POST['monto'];
                 $concepto = Sanitizar::limpiar($_POST['concepto']);
                 $metodo = $_POST['metodo'] ?? 'tarjeta';
+                $fechaFactura = $_POST['fecha_factura'] ?? date('Y-m-d');
                 $descripcion_asiento = "Pago Pasarela: $concepto";
 
                 // Validaciones Estrictas
                 if ($monto <= 0) {
                     throw new Exception("El monto debe ser mayor a cero.");
+                }
+
+                // Validación de Fecha
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaFactura)) {
+                    throw new Exception("Formato de fecha inválido.");
+                }
+                if ($fechaFactura > date('Y-m-d')) {
+                    throw new Exception("Error: No se permiten fechas futuras.");
                 }
 
                 if ($metodo == 'tarjeta') {
@@ -188,14 +207,18 @@ switch ($view) {
                 ];
 
                 $diarioModel = new DiarioModel();
-                $asientoId = $diarioModel->crearAsiento($_SESSION['user_id'], $descripcion_asiento, $detalles);
+                // Pasamos fecha factura como fecha operativa
+                $asientoId = $diarioModel->crearAsiento($_SESSION['user_id'], $descripcion_asiento, $detalles, $fechaFactura);
 
-                // Guardar transacción pasarela
+                // Guardar transacción pasarela con fecha operativa y created_at automático
                 $conn = (new \Config\Conexion())->getConnection();
-                $stmt = $conn->prepare("INSERT INTO transacciones_pasarela (monto, concepto, asiento_id) VALUES (?, ?, ?)");
-                $stmt->execute([$monto, $concepto, $asientoId]);
+                // Observar que fecha es la fecha manual, created_at se llena solo
+                $stmt = $conn->prepare("INSERT INTO transacciones_pasarela (monto, concepto, asiento_id, fecha) VALUES (?, ?, ?, ?)");
+                // Concatenamos hora actual a la fecha para que sea DATETIME válido si la columna es DATETIME
+                $fechaFull = $fechaFactura . ' ' . date('H:i:s');
+                $stmt->execute([$monto, $concepto, $asientoId, $fechaFull]);
 
-                $success = "Pago procesado con éxito. Asiento #$asientoId generado automáticamente.";
+                $success = "Pago procesado con éxito. Asiento #$asientoId generado automáticamente para la fecha $fechaFactura.";
             } catch (Exception $e) {
                 $error = "Error en el pago: " . $e->getMessage();
             }

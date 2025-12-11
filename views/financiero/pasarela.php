@@ -15,6 +15,24 @@
                 </div>
                 <div class="card-body p-4">
                     <form action="app.php?view=pasarela&action=pagar" method="POST" id="payment-form">
+
+                        <!-- Fecha de Operación/Factura -->
+                        <div class="mb-3">
+                            <label for="fecha_factura" class="form-label text-muted small fw-bold text-uppercase">Fecha
+                                de Operación/Factura</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i
+                                        class="bi bi-calendar-event text-muted"></i></span>
+                                <input type="date" class="form-control border-start-0 ps-0" id="fecha_factura"
+                                    name="fecha_factura"
+                                    value="<?php echo isset($_POST['fecha_factura']) ? $_POST['fecha_factura'] : date('Y-m-d'); ?>"
+                                    max="<?php echo date('Y-m-d'); ?>" required>
+                            </div>
+                            <div id="date-error" class="text-danger small mt-1" style="display:none">
+                                <i class="bi bi-exclamation-circle-fill me-1"></i> No se permiten fechas futuras.
+                            </div>
+                        </div>
+
                         <!-- Concepto -->
                         <div class="mb-3">
                             <label for="concepto"
@@ -23,7 +41,8 @@
                                 <span class="input-group-text bg-white border-end-0"><i
                                         class="bi bi-receipt text-muted"></i></span>
                                 <input type="text" class="form-control border-start-0 ps-0" id="concepto"
-                                    name="concepto" placeholder="Ej: Factura F-2025-001" required>
+                                    name="concepto" placeholder="Ej: Factura F-2025-001"
+                                    value="<?php echo isset($_POST['concepto']) ? $_POST['concepto'] : ''; ?>" required>
                             </div>
                         </div>
 
@@ -34,7 +53,8 @@
                                 <span class="input-group-text bg-white border-end-0 text-success fw-bold">$</span>
                                 <input type="number" step="0.01" min="0.01"
                                     class="form-control border-start-0 ps-0 fw-bold text-success" id="monto"
-                                    name="monto" placeholder="0.00" required>
+                                    name="monto" placeholder="0.00"
+                                    value="<?php echo isset($_POST['monto']) ? $_POST['monto'] : ''; ?>" required>
                             </div>
                         </div>
 
@@ -85,7 +105,8 @@
                                         <span class="input-group-text bg-white border-end-0"><i
                                                 class="bi bi-credit-card-2-front text-muted"></i></span>
                                         <input type="text" class="form-control border-start-0 ps-0" id="card_number"
-                                            name="card_number" placeholder="0000 0000 0000 0000" maxlength="19">
+                                            name="card_number" placeholder="0000 0000 0000 0000" maxlength="23"
+                                            value="<?php echo isset($_POST['card_number']) ? $_POST['card_number'] : ''; ?>">
                                     </div>
                                 </div>
                                 <div class="row g-2">
@@ -93,7 +114,8 @@
                                         <label for="card_expiry"
                                             class="form-label text-muted small fw-bold text-uppercase">Vencimiento</label>
                                         <input type="text" class="form-control" id="card_expiry" name="card_expiry"
-                                            placeholder="MM/YY" maxlength="5">
+                                            placeholder="MM/YY" maxlength="5"
+                                            value="<?php echo isset($_POST['card_expiry']) ? $_POST['card_expiry'] : ''; ?>">
                                     </div>
                                     <div class="col-6">
                                         <label for="card_cvv"
@@ -115,13 +137,15 @@
                                         class="form-label text-muted small fw-bold text-uppercase">Número de
                                         Referencia</label>
                                     <input type="text" class="form-control" id="referencia_pago" name="referencia_pago"
-                                        placeholder="Ej: ACH-12345678">
+                                        placeholder="Ej: ACH-12345678"
+                                        value="<?php echo isset($_POST['referencia_pago']) ? $_POST['referencia_pago'] : ''; ?>">
                                 </div>
                             </div>
                         </div>
 
                         <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-success btn-lg py-3 rounded-pill shadow-sm fw-bold">
+                            <button type="submit" id="btn-submit-pasarela"
+                                class="btn btn-success btn-lg py-3 rounded-pill shadow-sm fw-bold">
                                 <i class="bi bi-lock-fill me-2"></i>Pagar Ahora
                             </button>
                         </div>
@@ -185,6 +209,11 @@
         const cardExpiry = document.getElementById('card_expiry');
         const cardCvv = document.getElementById('card_cvv');
         const form = document.getElementById('payment-form');
+        const fechaFactura = document.getElementById('fecha_factura');
+
+        // Elementos validacion fecha
+        const errorDiv = document.getElementById('date-error');
+        const submitBtn = document.getElementById('btn-submit-pasarela');
 
         // Masking
         cardNumber.addEventListener('input', e => {
@@ -202,10 +231,35 @@
             e.target.value = e.target.value.replace(/\D/g, '');
         });
 
-        // Form Validation
+        // Validacion dinamica fecha
+        function validarFecha() {
+            const fechaVal = fechaFactura.value;
+            if (!fechaVal) return;
+
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            if (fechaVal > todayStr) {
+                // Fecha Futura
+                errorDiv.style.display = 'block';
+                fechaFactura.classList.add('is-invalid');
+                submitBtn.disabled = true;
+            } else {
+                // Fecha Válida
+                errorDiv.style.display = 'none';
+                fechaFactura.classList.remove('is-invalid');
+                submitBtn.disabled = false;
+            }
+        }
+
+        fechaFactura.addEventListener('change', validarFecha);
+        fechaFactura.addEventListener('input', validarFecha);
+        validarFecha(); // Check inicial
+
+        // Form Validation (on Submit)
         form.addEventListener('submit', function (e) {
             const monto = parseFloat(document.getElementById('monto').value);
             const metodo = document.querySelector('input[name="metodo"]:checked').value;
+            const fechaVal = fechaFactura.value;
 
             // 1. Validar Monto
             if (isNaN(monto) || monto <= 0) {
@@ -214,12 +268,22 @@
                 return;
             }
 
-            // 2. Validar Tarjeta Vencida
+            // 2. Validar Fecha Futura (JS side as well)
+            if (fechaVal) {
+                const todayStr = new Date().toISOString().split('T')[0];
+                if (fechaVal > todayStr) {
+                    e.preventDefault();
+                    alert("No se permiten fechas futuras.");
+                    return;
+                }
+            }
+
+            // 3. Validar Tarjeta Vencida
             if (metodo === 'tarjeta') {
                 const expiryValue = cardExpiry.value; // MM/YY
                 if (!/^\d{2}\/\d{2}$/.test(expiryValue)) {
                     e.preventDefault();
-                    alert("Formato de fecha inválido. Use MM/YY.");
+                    alert("Formato de fecha de expiración inválido. Use MM/YY.");
                     return;
                 }
 
@@ -240,6 +304,11 @@
         });
 
         // Init
-        selectMethod('tarjeta');
+        // Restore method if post back or default
+        <?php if (isset($_POST['metodo']) && $_POST['metodo'] == 'transferencia'): ?>
+            selectMethod('transferencia');
+        <?php else: ?>
+            selectMethod('tarjeta');
+        <?php endif; ?>
     });
 </script>

@@ -21,12 +21,25 @@
         </div>
     </div>
     <div class="card-body p-4">
-        <form action="app.php?view=diario&action=crear" method="POST">
-            <div class="mb-4">
-                <label for="descripcion" class="form-label text-muted fw-bold small text-uppercase">Descripción del
-                    Asiento</label>
-                <input type="text" class="form-control form-control-lg" id="descripcion" name="descripcion"
-                    placeholder="Ej: Pago de nómina mensual" required>
+        <form action="app.php?view=diario&action=crear" method="POST" id="diario-form">
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label for="fecha" class="form-label text-muted fw-bold small text-uppercase">Fecha de Operación
+                        (Taller/Histórico)</label>
+                    <input type="date" class="form-control form-control-lg" id="fecha" name="fecha"
+                        value="<?php echo isset($_POST['fecha']) ? $_POST['fecha'] : date('Y-m-d'); ?>"
+                        max="<?php echo date('Y-m-d'); ?>" required>
+                    <div id="date-error" class="text-danger small mt-1" style="display:none">
+                        <i class="bi bi-exclamation-circle-fill me-1"></i> No se permiten fechas futuras.
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <label for="descripcion" class="form-label text-muted fw-bold small text-uppercase">Descripción del
+                        Asiento</label>
+                    <input type="text" class="form-control form-control-lg" id="descripcion" name="descripcion"
+                        placeholder="Ej: Pago de nómina mensual"
+                        value="<?php echo isset($_POST['descripcion']) ? $_POST['descripcion'] : ''; ?>" required>
+                </div>
             </div>
 
             <div class="card bg-light border-0 mb-4">
@@ -113,7 +126,7 @@
             </div>
 
             <div class="d-flex justify-content-end">
-                <button type="submit" class="btn btn-success px-4 py-2 shadow-sm">
+                <button type="submit" id="btn-submit-diario" class="btn btn-success px-4 py-2 shadow-sm">
                     <i class="bi bi-check-lg me-2"></i>Registrar Asiento
                 </button>
             </div>
@@ -172,7 +185,12 @@
                                 <i class="bi bi-calendar-event me-1"></i>
                                 <?php echo date('d/m/Y', strtotime($asiento['fecha'])); ?>
                                 <br>
-                                <span class="text-xs ms-4"><?php echo date('H:i', strtotime($asiento['fecha'])); ?></span>
+                                <!-- Mostrar fecha de auditoría en tooltip o pequeño -->
+                                <span class="text-xs ms-1 text-secondary"
+                                    title="Fecha Auditoría: <?php echo $asiento['created_at']; ?>">
+                                    <i class="bi bi-clock"></i>
+                                    <?php echo date('H:i', strtotime($asiento['created_at'])); ?>
+                                </span>
                             </td>
                             <td class="fw-bold text-dark"><?php echo $asiento['descripcion']; ?></td>
                             <td>
@@ -190,7 +208,7 @@
                                         <i class="bi bi-lock-fill me-1"></i>CERRADO
                                     </span>
                                     <div class="text-muted mt-1 font-monospace" style="font-size: 0.65em;">
-                                        Firma: <?php echo substr($asiento['firma_digital'], 0, 6); ?>...
+                                        Firma: <?php echo substr($asiento['firma_digital'], 0, 8); ?>...
                                     </div>
                                 <?php else: ?>
                                     <span
@@ -217,7 +235,8 @@
                                                 ?>
                                                 <tr>
                                                     <td class="text-muted"><?php echo $d['codigo']; ?></td>
-                                                    <td class="text-truncate" style="max-width: 150px;"><?php echo $d['cuenta']; ?>
+                                                    <td class="text-truncate" style="max-width: 150px;">
+                                                        <?php echo $d['cuenta']; ?>
                                                     </td>
                                                     <td class="text-end fw-bold text-success">
                                                         <?php echo $d['debe'] > 0 ? '$' . number_format($d['debe'], 2) : '-'; ?>
@@ -249,4 +268,38 @@
 
         container.appendChild(row);
     }
+
+    // Validación Dinámica de Fecha
+    document.addEventListener('DOMContentLoaded', function () {
+        const fechaInput = document.getElementById('fecha');
+        const errorDiv = document.getElementById('date-error');
+        const submitBtn = document.getElementById('btn-submit-diario');
+
+        function validarFecha() {
+            const fechaVal = fechaInput.value;
+            if (!fechaVal) return;
+
+            const selectedDate = new Date(fechaVal);
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            if (fechaVal > todayStr) {
+                // Fecha Futura
+                errorDiv.style.display = 'block';
+                fechaInput.classList.add('is-invalid');
+                submitBtn.disabled = true;
+            } else {
+                // Fecha Válida
+                errorDiv.style.display = 'none';
+                fechaInput.classList.remove('is-invalid');
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Listeners
+        fechaInput.addEventListener('change', validarFecha);
+        fechaInput.addEventListener('input', validarFecha);
+
+        // Ejecutar al inicio por si viene sticky incorrecto
+        validarFecha();
+    });
 </script>

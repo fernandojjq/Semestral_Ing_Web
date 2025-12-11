@@ -27,7 +27,7 @@ class DiarioModel implements IManejoErrores
         return $mensaje;
     }
 
-    public function crearAsiento($usuario_id, $descripcion, $detalles)
+    public function crearAsiento($usuario_id, $descripcion, $detalles, $fechaOperacion = null)
     {
         // $detalles es un array de arrays: [['cuenta_id' => 1, 'debe' => 100, 'haber' => 0], ...]
 
@@ -49,10 +49,15 @@ class DiarioModel implements IManejoErrores
             }
 
             // 2. Insertar Cabecera
-            $queryCabecera = "INSERT INTO diario_cabecera (usuario_id, descripcion, estado) VALUES (:usuario_id, :descripcion, 'abierto')";
+            // Si no se pasa fechaOperacion, usamos la actual (date('Y-m-d H:i:s'))
+            $fechaFinal = $fechaOperacion ? $fechaOperacion . ' ' . date('H:i:s') : date('Y-m-d H:i:s');
+
+            // Insertamos 'fecha' (operativa) manual. 'created_at' (auditoría) es automático.
+            $queryCabecera = "INSERT INTO diario_cabecera (usuario_id, descripcion, estado, fecha) VALUES (:usuario_id, :descripcion, 'abierto', :fecha)";
             $stmt = $this->conn->prepare($queryCabecera);
             $stmt->bindParam(":usuario_id", $usuario_id);
             $stmt->bindParam(":descripcion", $descripcion);
+            $stmt->bindParam(":fecha", $fechaFinal);
             $stmt->execute();
 
             $diarioId = $this->conn->lastInsertId();
@@ -85,7 +90,7 @@ class DiarioModel implements IManejoErrores
         if ($filtroMes) {
             $query .= " WHERE MONTH(d.fecha) = :mes";
         }
-        $query .= " ORDER BY d.fecha DESC";
+        $query .= " ORDER BY d.fecha DESC, d.created_at DESC";
 
         $stmt = $this->conn->prepare($query);
         if ($filtroMes) {
